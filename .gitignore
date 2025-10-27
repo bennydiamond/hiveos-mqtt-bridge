@@ -1,0 +1,22 @@
+# Ignore Python virtual environment
+venv/
+
+# Ignore local configuration file
+config.yaml
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db

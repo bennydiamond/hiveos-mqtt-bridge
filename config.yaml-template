@@ -1,0 +1,33 @@
+mqtt:
+  host: 10.0.0.1
+  port: 1883
+  username: user
+  password: pass
+  # base topic used for telemetry and command topics
+  base_topic: hiveos/rig1
+  # discovery prefix for Home Assistant discovery (usually homeassistant)
+  discovery_prefix: homeassistant
+  # availability topic (LWT will publish offline to this)
+  availability_topic: hiveos/rig1/availability
+  client_id: hiveos-mqtt-bridge-rig1
+  keepalive: 60
+
+device:
+  name: HiveRig1
+  model: Custom Mining Rig
+  # client identifier short (used for device.identifiers)
+  identifier: hiverig1
+
+bridge:
+  stats_interval: 60   # seconds between polling / publishing the sensors
+  discovery_retained: true
+  telemetry_retained: false
+
+commands:
+  # full path commands (or expecting to be root)
+  start_miner: "miner start"
+  stop_miner: "miner stop"
+  restart_miner: "miner restart"
+  reboot: "reboot"
+  shutdown: "poweroff"
+

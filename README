@@ -1,0 +1,156 @@
+# HiveOS MQTT Bridge
+
+The **HiveOS MQTT Bridge** is a lightweight Python service that exposes your HiveOS mining rig statistics and control interface through **MQTT** — allowing seamless integration with **Home Assistant** or any other MQTT-based automation system.
+
+It publishes mining stats such as per-GPU hashrate, temperature, fan speed, power draw, and miner status to MQTT topics.  
+It also supports **Home Assistant MQTT Discovery**, so sensors appear automatically without manual configuration.
+
+---
+
+## 🧠 Purpose
+
+HiveOS miners already provide telemetry through local JSON files (e.g., `/var/run/hive/last_stat.json` and `/var/run/hive/gpu-stats.json`), but these are not directly usable outside of HiveOS.  
+
+This bridge reads those files periodically, extracts key data, and publishes it in a structured way over MQTT.  
+This allows you to:
+
+- Monitor your mining rig from **Home Assistant** or **Node-RED**
+- Automate reactions (e.g., turn on ventilation if GPU temps exceed threshold)
+- Track long-term mining performance via **MQTT sensors**
+- Send commands (start, stop, reboot, shutdown) remotely through MQTT topics
+
+---
+
+## ⚙️ Features
+
+- Automatic Home Assistant MQTT Discovery  
+- GPU sensors for:
+  - Temperature (°C)
+  - Fan speed (%)
+  - Power draw (W)
+  - Hashrate (MH/s)
+- Global rig sensors:
+  - Total hashrate
+  - Miner uptime
+  - Bridge uptime
+  - CPU temperature
+  - Load average
+  - Free disk space
+- Miner status, algorithm, and version reporting  
+- MQTT command topics (start/stop miner, reboot, shutdown, etc.)  
+- Clean restart and reconnection handling  
+- Simple configuration via YAML  
+- Runs reliably under **systemd**
+
+---
+
+## 📁 Configuration
+
+A sample configuration file is provided as:
+
+```
+config.yaml-template
+```
+
+You can copy and modify it to create your own `config.yaml`:
+
+```bash
+cp config.yaml-template config.yaml
+nano config.yaml
+```
+
+Example structure:
+
+```yaml
+mqtt:
+  host: 192.168.0.250
+  port: 1883
+  username: your_mqtt_user
+  password: your_mqtt_password
+  base_topic: hiveos/rig1
+poll_interval: 30
+rig_name: HiveRig1
+```
+
+---
+
+## 🧩 Installation
+
+1. **Clone or copy** the project to your HiveOS rig:
+   ```bash
+   sudo mkdir -p /opt/mqtt-bridge
+   cd /opt/mqtt-bridge
+   ```
+
+2. **Create a virtual environment**:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+3. **Configure your instance**:
+   ```bash
+   cp config.yaml-template config.yaml
+   nano config.yaml
+   ```
+
+4. **Test the bridge manually**:
+   ```bash
+   ./venv/bin/python mqtt-bridge.py
+   ```
+
+5. **(Optional) Install as a systemd service**  
+   Use the provided example unit file:
+   ```
+   /etc/systemd/system/mqtt-bridge.service
+   ```
+   Then enable it:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable mqtt-bridge
+   sudo systemctl start mqtt-bridge
+   ```
+
+---
+
+## 🧠 Home Assistant Integration
+
+Once the bridge connects to MQTT, Home Assistant will automatically discover all your sensors under the configured device name (e.g. “HiveRig1”).  
+No manual setup is required.
+
+If sensors do not appear:
+- Ensure MQTT Discovery is enabled in Home Assistant (`Settings → Devices & Services → MQTT`)
+- Check MQTT logs with `sudo journalctl -u mqtt-bridge -f`
+- Verify your MQTT base topic matches in both systems
+
+---
+
+## 🧰 Troubleshooting
+
+| Issue | Likely Cause | Solution |
+|-------|---------------|-----------|
+| Sensors show “unknown” | HiveOS JSON files missing or malformed | Ensure `/var/run/hive/last_stat.json` exists and is updated |
+| MQTT connection fails | Wrong broker IP or credentials | Check `config.yaml` and broker logs |
+| No sensors in Home Assistant | Discovery disabled | Enable MQTT discovery under integrations |
+| Bridge not restarting | Missing systemd setup | Reinstall the service or check logs |
+
+---
+
+## 🧾 License
+
+This project is provided for personal and educational use.  
+Use at your own risk; it directly interacts with HiveOS files and MQTT systems.
+
+---
+
+## 🧑‍💻 Author Notes
+
+- Written in Python 3.10+
+- Optimized for low CPU footprint on HiveOS rigs
+- Compatible with both AMD and NVIDIA setups
+- Works even when the miner is stopped (publishes last known values)
+
+---
+
+**Happy mining and automating!**

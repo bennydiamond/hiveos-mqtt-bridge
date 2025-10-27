@@ -1,0 +1,23 @@
+[Unit]
+Description=HiveOS MQTT Bridge
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/mqtt-bridge
+ExecStart=/opt/mqtt-bridge/venv/bin/python /opt/mqtt-bridge/mqtt-bridge.py
+Restart=always
+RestartSec=5
+User=root
+Environment=PYTHONUNBUFFERED=1
+
+# Delay startup until the system has settled (optional safety margin)
+ExecStartPre=/bin/sleep 3
+
+# Nice low priority so it doesn’t fight with miner processes
+Nice=10
+
+[Install]
+WantedBy=multi-user.target
