@@ -234,6 +234,18 @@ def get_hive_stats(start_time: float = START_TIME) -> Dict[str, Any]:
 
     return stats
 
+# -------- HiveOS Version---------
+# Get HiveOS version via dpkg
+def get_hiveos_version() -> str:
+    try:
+        out = subprocess.check_output(["dpkg", "-s", "hive"], text=True)
+        for line in out.splitlines():
+            if line.startswith("Version:"):
+                return line.split(":", 1)[1].strip()
+    except Exception:
+        pass
+    return "unknown"
+
 # ---------- MQTT setup ----------
 def create_mqtt_client() -> mqtt.Client:
     # Use callback API v2 if available (paho >= 1.6 provides CallbackAPIVersion)
@@ -370,7 +382,8 @@ def publish_discovery(client: mqtt.Client, userdata: Dict[str, Any]):
         "identifiers": [device_conf.get("identifier", DEVICE_ID)],
         "name": device_conf.get("name", DEVICE_NAME),
         "model": device_conf.get("model", DEVICE_MODEL),
-        "manufacturer": "HiveOS"
+        "manufacturer": "HiveOS",
+        "sw_version": get_hiveos_version()
     }
 
     stats = get_hive_stats(START_TIME)
